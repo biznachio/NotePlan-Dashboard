@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Command</key>
+	<string># NotePlan Dashboard 4.4 Calendar
+# change directory to NotePlan Notes folder
+cd /Users/XXX/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Documents/Notes
+
+#---variables---#
+
+# formatting
+format_heading=$(printf '\e[44m')
+format_reset=$(printf '\033[0m')
+format_today=$(printf '\033[1;30;47m')
+format_month=$(printf '\033[1;30;47m')
+format_tick_done=$(printf '\033[32m')
+format_tick_open=$(printf '\033[31m')
+format_tick_sched=$(printf '\033[34m')
+format_tick_canx=$(printf '\033[30m')
+tick='▊' 	
+
+# titles
+title_this_month=$(date +"%B %Y")
+title_next_month=$(date -v +1m +"%B %Y")
+title_counter="Productivity"
+title_active="Active"
+title_waiting="Waiting"
+title_delayed="Delayed"
+
+# dates
+day=$(date +"%A, %B %d")			
+today=$(date +%Y%m%d)				# store today's date as YYYYMMDD
+tomorrow=$(date -v+1d +%Y%m%d)
+this_month=`date +"%m %Y"`
+next_month=`date -v+1m +"%m %Y"`
+highlight=`date "+%e"` 
+
+# create current month calendar
+current_month=`cal -h $this_month | tail -7 | tr [a-z] [A-Z]`
+upcoming_month=`cal $next_month`
+
+#---end variables---#
+
+#---add calendars---#
+
+echo "$format_today $day $format_reset\n" | tr [a-z] [A-Z]
+
+# display current month calendar
+
+echo "$format_month $title_this_month $format_reset\n" | tr [a-z] [A-Z]
+
+echo "${current_month/${highlight}/$format_today${highlight}$format_reset}"
+
+# display next month calendar
+
+echo "\n$format_month $title_next_month $format_reset\n" | tr [a-z] [A-Z]
+
+cal -h $next_month | tail -7 | tr [a-z] [A-Z]
+
+#---end calendars---#
+
+#---add meters---#
+
+cd /Users/James/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Documents/Calendar # change to calendar folder
+
+echo "$format_month $title_counter $format_reset\n" | tr [a-z] [A-Z]
+
+# echo "Day Done  Graph" | tr [a-z] [A-Z]
+# echo "--- ----  -----"
+
+for (( i=1; i&lt;=7; i++ ))
+do
+	d=$(date -v-"$i"d  +"%Y%m%d")
+	dname=$(date -v-"$i"d  +"%a %b %d")
+	count_open=$(grep -v $'\t' $d.txt | grep -c '\[ \]')
+	count_done=$(grep -v $'\t' $d.txt | grep -c '\[x\]')
+	count_sched=$(grep -v $'\t' $d.txt | grep -c '\[&gt;\]')
+	count_canx=$(grep -v $'\t' $d.txt | grep -c '\[-\]')
+
+	printf "$dname ("
+		if (( $done &lt; 10 ))
+			then 
+				printf %02d $count_done
+			else
+				printf $count_done
+		fi
+
+	printf "):"
+
+	echo
+
+		for (( t=0; t&lt;$count_open; t++ ))
+		do
+			printf "$format_reset"
+			printf "$format_tick_open"
+			printf $tick
+			printf "$format_reset"
+		done
+
+		for (( t=0; t&lt;$count_done; t++ ))
+		do
+			printf "$format_tick_done"
+			printf $tick
+		done
+
+		for (( t=0; t&lt;$count_sched; t++ ))
+		do
+			printf "$format_reset"
+			printf "$format_tick_sched"
+			printf $tick
+			printf "$format_reset"
+		done
+
+		for (( t=0; t&lt;$count_canx; t++ ))
+		do
+			printf "$format_reset"
+			printf "$format_tick_canx"
+			printf $tick
+			printf "$format_reset"
+		done
+
+	echo "$format_reset\n"
+
+done
+#---end meters---#</string>
+	<key>DisplayID</key>
+	<integer>69992770</integer>
+	<key>DisplayStatusImage</key>
+	<false/>
+	<key>DropShadow</key>
+	<false/>
+	<key>FailureImage</key>
+	<data>
+	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
+	</data>
+	<key>FontFamily</key>
+	<string>Menlo-Regular</string>
+	<key>FontSize</key>
+	<real>12</real>
+	<key>GeekletFrame</key>
+	<string>{{10, 35}, {220, 1000}}</string>
+	<key>HasShadow</key>
+	<false/>
+	<key>Identifier</key>
+	<string>org.tynsoe.geeklet.shell</string>
+	<key>Name</key>
+	<string>NotePlan Dashboard Calendar</string>
+	<key>PinToSpace</key>
+	<false/>
+	<key>RefreshInterval</key>
+	<integer>10</integer>
+	<key>RelativePosition</key>
+	<integer>1</integer>
+	<key>SetLocale</key>
+	<false/>
+	<key>StatusImagePosition</key>
+	<integer>1</integer>
+	<key>SuccessImage</key>
+	<data>
+	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
+	</data>
+	<key>TextColor</key>
+	<data>
+	BAtzdHJlYW10eXBlZIHoA4QBQISEhAdOU0NvbG9yAISECE5TT2JqZWN0AIWEAWMBhARm
+	ZmZmAYNS/n8/g27/fz8Bhg==
+	</data>
+	<key>TextStrikethrough</key>
+	<integer>0</integer>
+	<key>TextUnderline</key>
+	<integer>0</integer>
+</dict>
+</plist>

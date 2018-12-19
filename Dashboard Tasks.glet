@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Command</key>
+	<string># NotePlan Dashboard v4.4
+
+# change directory to NotePlan Notes folder
+cd /Users/XXX/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Documents/Calendar
+
+IFS=$'\n'
+
+# handle formatting options
+format_heading=$(printf '\033[1;44m')
+format_reset=$(printf '\033[0m')
+format_today=$(printf '\033[1;30;47m')
+format_month=$(printf '\033[1;30;47m')
+format_tick=$(printf '\033[32m')
+bullet='»'
+tick='▊' 						#other ticks (full: █) (7/8: ▉) (3/4:▊) (1/2: ▌) (1/4: ▎)
+title_open='open:'
+title_done='done:'
+title_sched='scheduled:'
+title_canx='cancelled:'
+
+# handle dates
+day=$(date +"%A, %B %d")			# store &amp; format today's date
+today=$(date +%Y%m%d)				# store today's date as YYYYMMDD
+tomorrow=$(date -v+1d +%Y%m%d)	# store tomorrow's date as YYYYMMDD
+
+# count task state
+open=$(grep -v $'\t' $today.txt | grep -c '\[ \]')
+done=$(grep -v $'\t' $today.txt | grep -c '\[x\]')
+sched=$(grep -v $'\t' $today.txt | grep -c '\[&gt;\]')
+canx=$(grep -v $'\t' $today.txt | grep -c '\[-\]')
+subtasks=$(grep $'\t' $today.txt | grep -c '\[ \]')
+total_tasks=$(grep -c '\[*\]' $today.txt)
+
+# find and store focus areas in an array
+areas=($(grep '\[ \]' $today.txt | grep -o '\[\[[^$]*\]\]' | tr -d '[[|]]' | uniq -f 1))
+
+# count the number of open tasks without a focus area
+other_count=$(grep -v '\[\[[^$]*' $today.txt  |  grep -c '\[ \]' | grep -v $'\t')
+
+# output task scoreboard
+echo "$format_today $title_open $open   $title_done $done   $title_sched $sched   $title_canx $canx $format_reset\n" | tr [a-z] [A-Z]
+
+#---add icalbuddy calendar events---#
+if [[ $(/usr/local/bin/icalBuddy -n eventsToday) ]]
+then
+	echo "$format_heading $bullet events $format_reset\n" | tr [a-z] [A-Z]
+	/usr/local/bin/icalBuddy -po datetime,title -eep location,url,notes,attendees -ps "| |" -b " • " -n eventsToday
+	echo
+else
+	printf ""
+fi
+#---end icalbuddy calendar events---#
+
+#---add icalbuddy calendar reminders---#
+if [[ $(/usr/local/bin/icalBuddy tasksDueBefore:$'tomorrow') ]]
+then
+	echo "$format_heading $bullet reminders $format_reset\n" | tr [a-z] [A-Z]
+	/usr/local/bin/icalBuddy -po title -etp location,url,notes,attendee,datetime s -ps "| |" -b " • " tasksDueBefore:$'tomorrow'
+	echo
+else
+	printf ""
+fi
+#---end icalbuddy calendar reminders---#
+
+# loop through the stored focus areas and output the related tasks
+for (( i=0; i&lt;${#areas[@]}; i++ ))
+	do
+		echo "$format_heading $bullet ${areas[$i]} $format_reset\n" | tr [a-z] [A-Z]
+		grep "${areas[$i]}" $today.txt | grep '\[ \]' | grep -v $'\t' | sed 's/[&lt;&gt;].*//g' | sed 's/\[\[[^]]*\]\]//g' | cut -c 7- | sed -e 's/^/ • /'
+		printf "\n"
+	done	
+
+# not every task has a focus area
+
+if (( $i == 0 ))
+then
+	grep -v '\[\[[^$]*' $today.txt | grep '\[ \]' | grep -v $'\t' | sed 's/[&lt;&gt;].*//g' | cut -c 7- | sed -e 's/^/ • /'
+elif (( $i &gt;= 1 ))
+then
+	echo "$format_heading $bullet Other $format_reset\n" | tr [a-z] [A-Z]
+	grep -v '\[\[[^$]*' $today.txt | grep '\[ \]' | grep -v $'\t' | sed 's/[&lt;&gt;].*//g' | cut -c 7- | sed -e 's/^/ • /'
+fi
+
+</string>
+	<key>DisplayID</key>
+	<integer>69992770</integer>
+	<key>DropShadow</key>
+	<false/>
+	<key>FailureImage</key>
+	<data>
+	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
+	</data>
+	<key>FontFamily</key>
+	<string>Menlo-Regular</string>
+	<key>FontSize</key>
+	<real>12</real>
+	<key>GeekletFrame</key>
+	<string>{{500, 35}, {800, 1000}}</string>
+	<key>HasShadow</key>
+	<false/>
+	<key>Identifier</key>
+	<string>org.tynsoe.geeklet.shell</string>
+	<key>Name</key>
+	<string>NotePlan Dashboard Tasks</string>
+	<key>RefreshInterval</key>
+	<integer>10</integer>
+	<key>SetLocale</key>
+	<true/>
+	<key>SuccessImage</key>
+	<data>
+	TU0AKgAABAj///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANAAAAGgAAACAAAAAaAAAA
+	DQAAAAAAAAAAAAAAAAAAAAAAAAAA////AAAAAAAAAAAAAAAAAAAAAAgBAQFYFhUWqygn
+	KOEvLi/9KCco4RYVFqsBAQFYAAAACAAAAAAAAAAAAAAAAP///wAAAAAAAAAAAAAAAAgG
+	AwZ8Pj0+8peYl//S0tP/4+Tl/9LS0/+XmJf/Pj0+8gYDBnwAAAAIAAAAAAAAAAD///8A
+	AAAAAAAAAAUDAQJlLTEt9HqRff+40Ln/1efT/9jo1f/V59P/uNG5/3qRff8tMS30AwEC
+	ZQAAAAUAAAAA////AAAAAAAAAAAmEBYQyz1tP/9Xm03/eLJX/4e6YP+HuWL/h7pg/3ix
+	V/9Wmk3/PWw//xAWEMsAAAAmAAAAAP///wAAAAAAAAAAThY8Gvc8jjD/TJwb/2CnHf9r
+	ryz/bLEv/2ywLP9iqR7/TJ4b/zyQMP8WPBr3AAAATQAAAAD///8AAAAAAQAIAGgeYRv/
+	VaUq/2WvIP91uzb/gsZI/4bIS/+DyEj/d743/2exIP9WqSr/HmIb/wAIAGcAAAAB////
+	AAAAAAgADABsJ3MY/3C6Nv9/xz3/kNNT/57dYv+i32f/n99k/5HWVP+AyD3/cr02/yd0
+	GP8ADQBsAAAACf///wAAAAAMAAYAYydqEPB/yD7/lNhW/6PlZv+x8Xb/uPd8/7P0eP+k
+	6Gf/ldpX/4DLQP8maxDvAAYAYwAAAAv///8AAAAADwAAAE4XRwXLd8Y5/6foa/+393v/
+	wv6F/8r/i//F/4b/uPt8/6rubP95yTr/F0kFygAAAEwAAAAN////AAAAAAwAAAAyAAwA
+	jEB6GOyh7Vz/yP+J/9X/mP/b/5//2P+b/83/i/+m9F3/Qn4X7AEMAIsAAAAzAAAADP//
+	/wAAAAAFAAAAIAAAAF4GFQCpTIQc6ZbZU/zC+3n/2P+L/8T6fP+a21b8UIkd6AYXAKkA
+	AABcAAAAIAAAAAX///8AAAAAAQAAAA0AAAAzAAAAZwAFAKIaMwTHQGIZ2FV5JuFAYhnZ
+	GzQEyAAFAKAAAABnAAAAMgAAAA0AAAAB////AAAAAAAAAAADAAAAEQAAADQAAABdAAAA
+	ewAAAI8AAACWAAAAjwAAAHsAAABcAAAAMwAAABEAAAADAAAAAP///wAAAAAAAAAAAAAA
+	AAMAAAAOAAAAIQAAADYAAABGAAAATAAAAEcAAAA2AAAAIQAAAA0AAAAEAAAAAAAAAAD/
+	//8AAAAAAAAAAAAAAAAAAAAAAQAAAAUAAAALAAAAEAAAABMAAAASAAAADAAAAAUAAAAB
+	AAAAAAAAAAAAAAAAABABAAADAAAAAQAQAAABAQADAAAAAQAQAAABAgADAAAABAAABM4B
+	AwADAAAAAQABAAABBgADAAAAAQACAAABCgADAAAAAQABAAABEQAEAAAAAQAAAAgBEgAD
+	AAAAAQABAAABFQADAAAAAQAEAAABFgADAAAAAQAQAAABFwAEAAAAAQAABAABHAADAAAA
+	AQABAAABKAADAAAAAQACAAABUgADAAAAAQACAAABUwADAAAABAAABNaHcwAHAAACqAAA
+	BN4AAAAAAAgACAAIAAgAAQABAAEAAQAAAqhhcHBsAhAAAG1udHJSR0IgWFlaIAfiAAwA
+	BwAAAAAAAGFjc3BBUFBMAAAAAEFQUEwAAAAAAAAAAAAAAAAAAAAAAAD21gABAAAAANMt
+	YXBwbAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	DGRlc2MAAAEUAAAAdGNwcnQAAAGIAAAAI3d0cHQAAAGsAAAAFHJYWVoAAAHAAAAAFGdY
+	WVoAAAHUAAAAFGJYWVoAAAHoAAAAFHJUUkMAAAH8AAAADnZjZ3QAAAIMAAAAMG5kaW4A
+	AAI8AAAAPmNoYWQAAAJ8AAAALGJUUkMAAAH8AAAADmdUUkMAAAH8AAAADmRlc2MAAAAA
+	AAAAGkNhbGlicmF0ZWQgUkdCIENvbG9yc3BhY2UAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAdGV4dAAAAABDb3B5cmlnaHQgQXBwbGUgSW5jLiwgMjAxOAAAWFlaIAAAAAAA
+	APNRAAEAAAABFsxYWVogAAAAAAAAb6AAADj1AAADkFhZWiAAAAAAAABilwAAt4cAABjZ
+	WFlaIAAAAAAAACSfAAAPhAAAtsNjdXJ2AAAAAAAAAAEBzQAAdmNndAAAAAAAAAABAAEA
+	AAAAAAAAAQAAAAEAAAAAAAAAAQAAAAEAAAAAAAAAAQAAbmRpbgAAAAAAAAA2AACj1wAA
+	VHsAAEzNAACZmgAAJmYAAA9cAABQDQAAVDkAAczOAAHMzgABzM4AAAAAAAAAAHNmMzIA
+	AAAAAAEMQgAABd7///MmAAAHkwAA/ZD///ui///9owAAA9wAAMBu
+	</data>
+	<key>TextColor</key>
+	<data>
+	BAtzdHJlYW10eXBlZIHoA4QBQISEhAdOU0NvbG9yAISECE5TT2JqZWN0AIWEAWMBhARm
+	ZmZmAYNS/n8/g27/fz8Bhg==
+	</data>
+	<key>TextStrikethrough</key>
+	<integer>0</integer>
+	<key>TextUnderline</key>
+	<integer>0</integer>
+</dict>
+</plist>
