@@ -1,4 +1,4 @@
-# NotePlan-Tools
+# NotePlan-Dashboard
 
 [NotePlan](https://noteplan.co) is great! It's a iOS and macOS app to plan your day, take notes, and keep track of everything in your calendar. The developer describes NotePlan as a digital [Bullet Journal](https://www.bulletjournal.com). 
 
