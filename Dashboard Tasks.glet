@@ -20,7 +20,7 @@ userDir='/Users/XXX/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Doc
 #---end custom options---#
 
 #---add variables---#
-IFS=$'\n'								# make let lines internal field separator
+IFS=$'\n'				# set new as lines internal field separator
 format_heading=$(printf '\033[1;44m')   # ansi formatting for headings
 format_reset=$(printf '\033[0m')        # reset ansi formatting
 format_board=$(printf '\033[1;30;47m')  # ansi formatting for scoreboard
@@ -32,7 +32,7 @@ title_canx='cancelled:'                 # title for cancelled tasks
 title_cal='events'                      # heading for events
 title_reminder='reminders'              # heading for reminders
 title_noarea='other'                    # heading for tasks without focus area
-today=$(date +%Y%m%d)					# store today's date as YYYYMMDD
+today=$(date +%Y%m%d)			# store today's date as YYYYMMDD
 tomorrow=$(date -v+1d +%Y%m%d)	        # store tomorrow's date as YYYYMMDD
 
 eval cd "$userDir"
@@ -92,8 +92,8 @@ for (( i=0; i&lt;${#areas[@]}; i++ ))
 #---end focus areas &amp; tasks---#
 
 #---add tasks without areas---#
-
-if [[ $reminders || $events ]] &amp;&amp; (( $i == 0 ))             # if there are events or reminders, add header to tasks without areas
+# if there are events or reminders, add header to tasks without areas
+if [[ $reminders || $events ]] &amp;&amp; (( $i == 0 ))
 then
 	echo "$format_heading $bullet $title_noarea $format_reset\n" | tr [a-z] [A-Z]
 	grep -v '\[\[[^$]*' $today.txt | grep '\[ \]' | grep -v $'\t' | sed 's/[&lt;&gt;].*//g' | cut -c 7- | sed -e 's/^/ • /'
