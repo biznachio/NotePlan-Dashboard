@@ -3,52 +3,59 @@
 <plist version="1.0">
 <dict>
 	<key>Command</key>
-	<string># NotePlan Dashboard v4.4
+	<string># NotePlan Dashboard v4.5
+# Changelog
+# 4.5
+    # New: Added a Changelog 
+    # New: Users can set customizable options for:
+		# Excluded calendars
+		# User directory
+    # Update: Reworked the Other heading to show/hide if there are events or reminders
+    # Fix: Bug preventing all focus areas from getting displayed
+    # Fix: Cleaned up the code
+    
+#---add custom options---#
+excludedCals=''				# comma separated list of calendars to not show in events
+userDir='/Users/XXX/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Documents/Calendar'
+#---end custom options---#
 
-# change directory to NotePlan Notes folder
-cd /Users/XXX/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Documents/Calendar
+#---add variables---#
+IFS=$'\n'								# make let lines internal field separator
+format_heading=$(printf '\033[1;44m')   # ansi formatting for headings
+format_reset=$(printf '\033[0m')        # reset ansi formatting
+format_board=$(printf '\033[1;30;47m')  # ansi formatting for scoreboard
+bullet='»'                              # bullet for headings
+title_open='open:'                      # title for open tasks
+title_done='done:'                      # title for completed tasks                          
+title_sched='scheduled:'                # title for scheduled tasks
+title_canx='cancelled:'                 # title for cancelled tasks
+title_cal='events'                      # heading for events
+title_reminder='reminders'              # heading for reminders
+title_noarea='other'                    # heading for tasks without focus area
+today=$(date +%Y%m%d)					# store today's date as YYYYMMDD
+tomorrow=$(date -v+1d +%Y%m%d)	        # store tomorrow's date as YYYYMMDD
 
-IFS=$'\n'
+eval cd "$userDir"
 
-# handle formatting options
-format_heading=$(printf '\033[1;44m')
-format_reset=$(printf '\033[0m')
-format_today=$(printf '\033[1;30;47m')
-format_month=$(printf '\033[1;30;47m')
-format_tick=$(printf '\033[32m')
-bullet='»'
-tick='▊' 						#other ticks (full: █) (7/8: ▉) (3/4:▊) (1/2: ▌) (1/4: ▎)
-title_open='open:'
-title_done='done:'
-title_sched='scheduled:'
-title_canx='cancelled:'
-
-# handle dates
-day=$(date +"%A, %B %d")			# store &amp; format today's date
-today=$(date +%Y%m%d)				# store today's date as YYYYMMDD
-tomorrow=$(date -v+1d +%Y%m%d)	# store tomorrow's date as YYYYMMDD
-
-# count task state
+#---add task scoreboard---#
+# determine task states
 open=$(grep -v $'\t' $today.txt | grep -c '\[ \]')
 done=$(grep -v $'\t' $today.txt | grep -c '\[x\]')
 sched=$(grep -v $'\t' $today.txt | grep -c '\[&gt;\]')
 canx=$(grep -v $'\t' $today.txt | grep -c '\[-\]')
 subtasks=$(grep $'\t' $today.txt | grep -c '\[ \]')
-total_tasks=$(grep -c '\[*\]' $today.txt)
 
-# find and store focus areas in an array
-areas=($(grep '\[ \]' $today.txt | grep -o '\[\[[^$]*\]\]' | tr -d '[[|]]' | uniq -f 1))
-
-# count the number of open tasks without a focus area
-other_count=$(grep -v '\[\[[^$]*' $today.txt  |  grep -c '\[ \]' | grep -v $'\t')
-
-# output task scoreboard
-echo "$format_today $title_open $open   $title_done $done   $title_sched $sched   $title_canx $canx $format_reset\n" | tr [a-z] [A-Z]
+echo "$format_board $title_open $open   $title_done $done   $title_sched $sched   $title_canx $canx $format_reset\n" | tr [a-z] [A-Z]
+#---end task scoreboard---#
 
 #---add icalbuddy calendar events---#
-if [[ $(/usr/local/bin/icalBuddy -n eventsToday) ]]
+# determine if there are any events
+events=$(/usr/local/bin/icalBuddy -n -ec ${excludedCals} eventsToday)
+
+# if there are events then display the events, if not display nothing
+if [[ $events ]]
 then
-	echo "$format_heading $bullet events $format_reset\n" | tr [a-z] [A-Z]
+	echo "$format_heading $bullet $title_cal $format_reset\n" | tr [a-z] [A-Z]
 	/usr/local/bin/icalBuddy -po datetime,title -eep location,url,notes,attendees -ps "| |" -b " • " -n eventsToday
 	echo
 else
@@ -57,9 +64,12 @@ fi
 #---end icalbuddy calendar events---#
 
 #---add icalbuddy calendar reminders---#
-if [[ $(/usr/local/bin/icalBuddy tasksDueBefore:$'tomorrow') ]]
+# determine if there are any reminders
+reminders=$(/usr/local/bin/icalBuddy tasksDueBefore:$'tomorrow')
+
+if [[ $reminders ]]
 then
-	echo "$format_heading $bullet reminders $format_reset\n" | tr [a-z] [A-Z]
+	echo "$format_heading $bullet $title_reminder $format_reset\n" | tr [a-z] [A-Z]
 	/usr/local/bin/icalBuddy -po title -etp location,url,notes,attendee,datetime s -ps "| |" -b " • " tasksDueBefore:$'tomorrow'
 	echo
 else
@@ -67,26 +77,44 @@ else
 fi
 #---end icalbuddy calendar reminders---#
 
-# loop through the stored focus areas and output the related tasks
+#---add focus areas &amp; tasks---#
+
+# find &amp; store focus areas in an array
+areas=($(grep '\[ \]' $today.txt | grep -o '\[\[[^$]*\]\]' | tr -d '[[|]]' | uniq ))
+
+# loop through the stored focus areas &amp; output related tasks
 for (( i=0; i&lt;${#areas[@]}; i++ ))
 	do
 		echo "$format_heading $bullet ${areas[$i]} $format_reset\n" | tr [a-z] [A-Z]
 		grep "${areas[$i]}" $today.txt | grep '\[ \]' | grep -v $'\t' | sed 's/[&lt;&gt;].*//g' | sed 's/\[\[[^]]*\]\]//g' | cut -c 7- | sed -e 's/^/ • /'
 		printf "\n"
 	done	
+#---end focus areas &amp; tasks---#
 
-# not every task has a focus area
+#---add tasks without areas---#
 
-if (( $i == 0 ))
+if [[ $reminders || $events ]] &amp;&amp; (( $i == 0 ))             # if there are events or reminders, add header to tasks without areas
+then
+	echo "$format_heading $bullet $title_noarea $format_reset\n" | tr [a-z] [A-Z]
+	grep -v '\[\[[^$]*' $today.txt | grep '\[ \]' | grep -v $'\t' | sed 's/[&lt;&gt;].*//g' | cut -c 7- | sed -e 's/^/ • /'
+elif (( $i == 0 ))
 then
 	grep -v '\[\[[^$]*' $today.txt | grep '\[ \]' | grep -v $'\t' | sed 's/[&lt;&gt;].*//g' | cut -c 7- | sed -e 's/^/ • /'
 elif (( $i &gt;= 1 ))
 then
-	echo "$format_heading $bullet Other $format_reset\n" | tr [a-z] [A-Z]
+	echo "$format_heading $bullet $title_noarea $format_reset\n" | tr [a-z] [A-Z]
 	grep -v '\[\[[^$]*' $today.txt | grep '\[ \]' | grep -v $'\t' | sed 's/[&lt;&gt;].*//g' | cut -c 7- | sed -e 's/^/ • /'
 fi
+#---end tasks without areas---#
 
-</string>
+# find tasks assigned a focus area		    grep "${areas[$i]}" $today.txt
+# find only open tasks					    grep '\[ \]' 
+# exclude indented tasks					grep -v $'\t' 
+# remove "- [ ]" for nicer formatting		cut -c 7-
+# add space + bullet at start of line		sed -e 's/^/• /' 
+# removes the focus area in the line		sed 's/\[\[[^]]*\]\]//g' 
+# removes "&lt;" and everything after		    sed 's/\&lt;[^]]*//'
+# removes everything after "&lt;" or "&gt;"		sed 's/[&lt;&gt;].*//g'</string>
 	<key>DisplayID</key>
 	<integer>69992770</integer>
 	<key>DropShadow</key>
