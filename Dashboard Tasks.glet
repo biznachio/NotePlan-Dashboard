@@ -3,8 +3,10 @@
 <plist version="1.0">
 <dict>
 	<key>Command</key>
-	<string># NotePlan Dashboard v4.5
+	<string># NotePlan Dashboard v4.5.1
 # Changelog
+# 4.5.1
+    # Fix: Misplaced comment tag
 # 4.5
     # New: Added a Changelog 
     # New: Users can set customizable options for:
@@ -20,7 +22,7 @@ userDir='/Users/XXX/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Doc
 #---end custom options---#
 
 #---add variables---#
-IFS=$'\n'				# set new as lines internal field separator
+IFS=$'\n'								# make let lines internal field separator
 format_heading=$(printf '\033[1;44m')   # ansi formatting for headings
 format_reset=$(printf '\033[0m')        # reset ansi formatting
 format_board=$(printf '\033[1;30;47m')  # ansi formatting for scoreboard
@@ -32,7 +34,7 @@ title_canx='cancelled:'                 # title for cancelled tasks
 title_cal='events'                      # heading for events
 title_reminder='reminders'              # heading for reminders
 title_noarea='other'                    # heading for tasks without focus area
-today=$(date +%Y%m%d)			# store today's date as YYYYMMDD
+today=$(date +%Y%m%d)					# store today's date as YYYYMMDD
 tomorrow=$(date -v+1d +%Y%m%d)	        # store tomorrow's date as YYYYMMDD
 
 eval cd "$userDir"
