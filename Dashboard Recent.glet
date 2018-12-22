@@ -3,41 +3,86 @@
 <plist version="1.0">
 <dict>
 	<key>Command</key>
-	<string># NotePlan Dashboard 4.4 Recent
-# change directory to NotePlan Notes folder
-cd /Users/XXX/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Documents/Notes
+	<string># NotePlan Dashboard v4.5
+# Changelog
+# 4.5
+    # New: Added a Changelog 
+    # New: Users can set customizable options for:
+		# Heading titles
+		# Recent files dot
+		# User directory
+    # Update: Reworked the headings to show/hide if there are find results
+	# Update: Reworked headings to show number of results
+	# Update: Added nicer formatting to headings and results
+    # Fix: Bug preventing all focus areas from getting displayed
+    # Fix: Cleaned up the code
 
-#---variables---#
+#---add custom options---#
+userDir='/Users/XXX/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Documents/Notes'
+titles='recent,waiting,old'				# add customs titles, separate with a comma
+dot='•'									# custom dot for results
+#---end custom options---#
 
-# formatting
-format_heading=$(printf '\e[44m')
-format_reset=$(printf '\033[0m')
-format_today=$(printf '\033[1;30;47m')
-format_month=$(printf '\033[1;30;47m')
-
-# titles
-title_active="Active"
-title_waiting="Waiting"
-title_delayed="Delayed"
+#---add variables---#
+IFS=','	read -r -a t &lt;&lt;&lt; "$titles"		# make an array for custom titles
+IFS=','	read -r -a c &lt;&lt;&lt; "$colors"		# make an array for custom titles
+format_heading=$(printf '\033[1;37;45m')  		# ansi formatting for headings
+format_reset=$(printf '\033[0m')        	# reset ansi formatting
+bullet='»'                              	# bullet for headings
+#---end variables---#
 
 #---add recent---#
+eval cd $userDir
 
-echo "$format_month $title_active $format_reset\n" | tr [a-z] [A-Z]
+# determine when files were last modified
+mod_in_3=$(find *.txt -type f -mtime -3 | wc -l | sed -e 's/^[ \t]*//')
+mod_3_to_30=$(find *.txt -type f -mtime -30 ! -mtime -3 | wc -l | sed -e 's/^[ \t]*//')
+mod_over_30=$(find *.txt -type f ! -mtime -30 | wc -l | sed -e 's/^[ \t]*//')
 
-# find files modified in last 3 days
-find *.txt -type f -mtime -3 | cut -d "." -f 1
+# if there are files then display them, if not display nothing
 
-echo "\n$format_month $title_waiting $format_reset\n" | tr [a-z] [A-Z]
+if [[ $mod_in_3 ]]
+then
+	IFS=$'\n'
+	echo "$format_heading $bullet ${t[0]} ($mod_in_3) $format_reset" | tr [a-z] [A-Z]
+	echo
+	for i in $(find *.txt -type f -mtime -3 | cut -d "." -f 1)
+	do
+		echo "$i" | sed -e 's/^/ '"$dot"' /'
+	done
+	echo
+else
+	continue
+fi
 
-# find files modifiied between 3 and 29 days
-find *.txt -type f -mtime -29 ! -mtime -3 | cut -d "." -f 1
+if [[ $mod_3_to_30 ]]
+then
+	IFS=$'\n'
+	echo "$format_heading $bullet ${t[1]} ($mod_3_to_30) $format_reset" | tr [a-z] [A-Z]
+	echo
+	for i in $(find *.txt -type f -mtime -30 ! -mtime -3 | cut -d "." -f 1 )
+	do
+		echo "$i" | sed -e 's/^/ '"$dot"' /'
+	done
+	echo
+else
+	continue
+fi
 
-echo "\n$format_month $title_delayed $format_reset\n" | tr [a-z] [A-Z]
+if [[ $mod_over_30 ]]
+then
+	IFS=$'\n'
+	echo "$format_heading $bullet ${t[2]} ($mod_over_30) $format_reset" | tr [a-z] [A-Z]
+	echo
+	for i in $(find *.txt -type f ! -mtime -30 | cut -d "." -f 1 )
+	do
+		echo "$i" | sed -e 's/^/ '"$dot"' /'
+	done
+	echo
+else
+	continue
+fi
 
-#find filed modified beyond 30 days
-find *.txt -type f ! -mtime -30 | cut -d "." -f 1
-
-echo
 #---end recent---#</string>
 	<key>DisplayID</key>
 	<integer>69992770</integer>
