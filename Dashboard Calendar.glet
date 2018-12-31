@@ -3,22 +3,33 @@
 <plist version="1.0">
 <dict>
 	<key>Command</key>
-	<string># NotePlan Dashboard 4.4 Calendar
-# change directory to NotePlan Notes folder
-cd /Users/XXX/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Documents/Notes
+	<string># NotePlan Dashboard Calendar v4.5
+# 4.5
+    # New: Added a Changelog 
+    # New: Users can set customizable options for:
+		# User directory
+		# Productivity meter tick
 
-#---variables---#
+#---add custom options---#
+#
+userDir='/Users/XXX/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Documents/Calendar'
+tick='▊' 
+#
+#---end custom options---#
+
+
+#---add variables---#
 
 # formatting
-format_heading=$(printf '\e[44m')
-format_reset=$(printf '\033[0m')
-format_today=$(printf '\033[1;30;47m')
-format_month=$(printf '\033[1;30;47m')
-format_tick_done=$(printf '\033[32m')
-format_tick_open=$(printf '\033[31m')
-format_tick_sched=$(printf '\033[34m')
-format_tick_canx=$(printf '\033[30m')
-tick='▊' 	
+format_heading=$(printf '\e[44m')			# ansi formatting for headings
+format_reset=$(printf '\033[0m')			# reset ansi formatting
+format_today=$(printf '\033[1;30;47m')		# ansi formatting for today highlight
+format_month=$(printf '\033[1;30;47m')		# ansi formatting for month headings
+format_tick_done=$(printf '\033[32m')		# ansi formatting for ticks
+format_tick_open=$(printf '\033[31m')		# ansi formatting for ticks
+format_tick_sched=$(printf '\033[34m')		# ansi formatting for ticks
+format_tick_canx=$(printf '\033[30m')		# ansi formatting for ticks
+	
 
 # titles
 title_this_month=$(date +"%B %Y")
@@ -30,7 +41,7 @@ title_delayed="Delayed"
 
 # dates
 day=$(date +"%A, %B %d")			
-today=$(date +%Y%m%d)				# store today's date as YYYYMMDD
+today=$(date +%Y%m%d)			
 tomorrow=$(date -v+1d +%Y%m%d)
 this_month=`date +"%m %Y"`
 next_month=`date -v+1m +"%m %Y"`
@@ -62,7 +73,7 @@ cal -h $next_month | tail -7 | tr [a-z] [A-Z]
 
 #---add meters---#
 
-cd /Users/James/Library/Mobile\ Documents/iCloud\~co\~noteplan\~NotePlan/Documents/Calendar # change to calendar folder
+eval cd "$userDir"
 
 echo "$format_month $title_counter $format_reset\n" | tr [a-z] [A-Z]
 
@@ -125,7 +136,7 @@ do
 done
 #---end meters---#</string>
 	<key>DisplayID</key>
-	<integer>69992770</integer>
+	<integer>69992768</integer>
 	<key>DisplayStatusImage</key>
 	<false/>
 	<key>DropShadow</key>
